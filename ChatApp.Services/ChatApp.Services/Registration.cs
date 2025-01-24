@@ -1,4 +1,5 @@
 ﻿
+using AutoMapper;
 using ChatApp.Services.Services.GroupService;
 using ChatApp.Services.Services.MessageService;
 using ChatApp.Services.Services.UserService;
@@ -14,6 +15,14 @@ namespace ChatApp.Services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IMessageService, MessageService>();
+
+
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new Mapping.MyProfiles());
+            });
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
     }
 }

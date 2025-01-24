@@ -12,10 +12,10 @@ namespace ChatApp.Data.Entities
         public string Password { get; set; }
         public string Email { get; set; }
         public string FullName { get; set; }
-        public string AvatarPath { get; set; }
-        public string Role { get; set; }
+        public string? AvatarPath { get; set; }
+        public string? Role { get; set; }
 
-        public string ConnectionId { get; set; }
+        public string? ConnectionId { get; set; }
         public ICollection<Message> Messages { get; set; }
         public ICollection<Group> Groups { get; set; }
 
