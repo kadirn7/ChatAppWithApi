@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using ChatApp.Data.Entities;
 using ChatApp.Services.Models.User;
 namespace ChatApp.Services.Mapping
 {
@@ -11,8 +12,9 @@ namespace ChatApp.Services.Mapping
     {
         public MyProfiles()
         {
-            CreateMap<ChatApp.Data.Entities.User, UserCreateModel>().ReverseMap();
-            
+            CreateMap<User, UserCreateModel>().ReverseMap();
+            CreateMap<User, UserModel>().ReverseMap();
+            CreateMap<User,UserUpdateModel>().ReverseMap();
         }
     }
 }
