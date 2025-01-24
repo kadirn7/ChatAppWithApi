@@ -4,7 +4,7 @@ using ChatApp.Data.Models;
 using ChatApp.Models;
 using ChatApp.Services.Models.User;
 using ChatApp.Services.Services.UserService;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
@@ -29,9 +29,10 @@ namespace ChatApp.Controllers
             return new ReturnModel
             {
                 Success = true,
-                Message = "Users fetched successfully",
-                Data = users,
-                StatusCode = 200
+                Message = "Success",
+                Data = _mapper.Map<List<UserModel>>(users),
+                StatusCode = 200,
+                TotalCount = await _userService.CountAsync()
             };
         }
         [HttpGet("{id}")]
@@ -56,7 +57,7 @@ namespace ChatApp.Controllers
             };
         }
         [HttpPost]
-        public async Task<ReturnModel> CreateUser([FromBody]UserCreateModel userCreateModel)
+        public async Task<ReturnModel> CreateUser([FromBody] UserCreateModel userCreateModel)
         {
             var newUser = _mapper.Map<User>(userCreateModel);
             await _userService.AddAsync(newUser);
@@ -66,6 +67,41 @@ namespace ChatApp.Controllers
                 Message = "User created successfully",
                 Data = newUser,
                 StatusCode = 201
+            };
+        }
+        [HttpPut]
+        public async Task<ReturnModel> UpdateUser([FromBody] UserUpdateModel userUpdateModel)
+        {
+            var user = _mapper.Map<User>(userUpdateModel);
+            var updatedUser = await _userService.UpdateAsync(user);
+            return new ReturnModel
+            {
+                Success = true,
+                Message = "User updated successfully",
+                Data = updatedUser,
+                StatusCode = 200
+            };
+
+        }
+        [HttpDelete("{id}")]
+        public async Task<ReturnModel> DeleteUser(int id)
+        {
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+            {
+                return new ReturnModel
+                {
+                    Success = false,
+                    Message = "User not found",
+                    StatusCode = 404
+                };
+            }
+            await _userService.DeleteAsync(user);
+            return new ReturnModel
+            {
+                Success = true,
+                Message = "User deleted successfully",
+                StatusCode = 200
             };
         }
     }

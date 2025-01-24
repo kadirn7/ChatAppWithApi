@@ -20,6 +20,7 @@ namespace ChatApp.Services
             var mapperConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new Mapping.MyProfiles());
+               
             });
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
