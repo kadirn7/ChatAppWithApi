@@ -14,36 +14,36 @@ namespace ChatApp.Controllers
     [ApiController]
     public class GroupController : ControllerBase
     {
-        private readonly GroupService _groupService;
+        private readonly IGroupService _groupService;
         private readonly IMapper _mapper;
 
-        public GroupController(IMapper mapper, GroupService groupService)
+        public GroupController(IMapper mapper, IGroupService groupService)
         {
             _mapper = mapper;
             _groupService = groupService;
         }
         [HttpGet]
-        public async Task<ReturnModel> GetMessage([FromQuery] PaginationModel paginationModel)
+        public async Task<ReturnModel> GetGroup([FromQuery] PaginationModel paginationModel)
         {
             var messages = await _groupService.ListAllAsync(paginationModel);
             return new ReturnModel
             {
                 Success = true,
                 Message = "Success",
-                Data = _mapper.Map<List<MessageModel>>(messages),
+                Data = _mapper.Map<List<GroupModel>>(messages),
                 StatusCode = 200,
                 TotalCount = await _groupService.CountAsync()
             };
         }
         [HttpGet("{id}")]
-        public async Task<ReturnModel> GetMessageById(int id)
+        public async Task<ReturnModel> GetGroupById(int id)
         {
             var message = await _groupService.GetByIdAsync(id);
             return new ReturnModel
             {
                 Success = true,
                 Message = "Success",
-                Data = _mapper.Map<MessageModel>(message),
+                Data = _mapper.Map<GroupModel>(message),
                 StatusCode = 200
             };
         }
@@ -56,7 +56,7 @@ namespace ChatApp.Controllers
             {
                 Success = true,
                 Message = "Success",
-                Data = _mapper.Map<MessageModel>(Result),
+                Data = Result,
                 StatusCode = 201
             };
         }
@@ -69,10 +69,24 @@ namespace ChatApp.Controllers
             {
                 Success = true,
                 Message = "Success",
-                Data = _mapper.Map<MessageModel>(Result),
+                Data = Result,
                 StatusCode = 200
             };
         }
+        [HttpDelete("{id}")]
+        public async Task<ReturnModel> DeleteGroup(int id)
+        {
 
+            var group = await _groupService.GetByIdAsync(id);
+            await _groupService.DeleteAsync(group);
+            return new ReturnModel
+            {
+                Success = true,
+                Message = "Success",
+                Data = group,
+                StatusCode = 200
+            };
+        }
+        
+        }
     }
-}

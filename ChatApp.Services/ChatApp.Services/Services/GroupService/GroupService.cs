@@ -6,7 +6,7 @@ namespace ChatApp.Services.Services.GroupService
 {
     public class GroupService : IGroupService
     {
-        private readonly IGroupRepository _groupRepository;
+        public readonly IGroupRepository _groupRepository;
 
         public GroupService(IGroupRepository groupRepository)
         {
