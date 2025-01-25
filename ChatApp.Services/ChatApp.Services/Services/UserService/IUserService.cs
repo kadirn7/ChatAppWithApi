@@ -9,6 +9,6 @@ namespace ChatApp.Services.Services.UserService
 {
     public interface IUserService:IGenericService<User>
     {
-
+        public Task<User> GetByUsernameAndPasswordAsync(string username, string password);
     }
 }
