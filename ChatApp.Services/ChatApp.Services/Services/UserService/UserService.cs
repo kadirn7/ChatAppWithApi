@@ -38,6 +38,11 @@ namespace ChatApp.Services.Services.UserService
             return await _userRepository.GetByIdAsync(id);
         }
 
+        public async Task<User> GetByUsernameAndPasswordAsync(string username, string password)
+        {
+            return await _userRepository.GetByUsernameAndPasswordAsync(username, password);
+        }
+
         public async Task<IReadOnlyList<User>> ListAllAsync(PaginationModel paginationModel)
         {
             return await _userRepository.ListAllAsync(paginationModel);

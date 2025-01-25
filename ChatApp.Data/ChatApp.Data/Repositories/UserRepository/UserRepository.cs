@@ -4,17 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChatApp.Data.Entities;
+using ChatApp.Data.Entities.Db;
 using ChatApp.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Data.Repositories.UserRepository
 {
     public class UserRepository : IUserRepository
     {
         private readonly IGenericRepository<User> _genericRepository;
-
-        public UserRepository(IGenericRepository<User> genericRepository)
+        private readonly ChatAppDbContext _context;
+        public UserRepository(IGenericRepository<User> genericRepository, ChatAppDbContext context)
         {
             _genericRepository = genericRepository;
+            _context = context;
         }
 
         public async Task<User> AddAsync(User entity)
@@ -35,6 +38,12 @@ namespace ChatApp.Data.Repositories.UserRepository
         public async Task<User> GetByIdAsync(int id)
         {
             return await _genericRepository.GetByIdAsync(id);
+        }
+
+        public async Task<User> GetByUsernameAndPasswordAsync(string username, string password)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Username == username && x.Password == password);
+
         }
 
         public async Task<IReadOnlyList<User>> ListAllAsync(PaginationModel paginationModel)

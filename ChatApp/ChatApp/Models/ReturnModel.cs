@@ -1,6 +1,6 @@
 ﻿namespace ChatApp.Models
 {
-    public class ReturnModel
+    public record ReturnModel
     {
         public bool Success { get; set; }
         public string Message { get; set; }
