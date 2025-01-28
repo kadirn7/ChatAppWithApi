@@ -1,6 +1,8 @@
 using System.Text;
+using ChatApp;
 using ChatApp.Data;
 using ChatApp.Data.Entities.Db;
+using ChatApp.Helpers;
 using ChatApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -41,11 +43,24 @@ builder.Services.AddSwaggerGen(c => {
       
 });
 
-
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 builder.Services.AddRepository(builder.Configuration);
 builder.Services.AddServices();
+builder.Services.AddSingleton<ISignalrConnection, SignalrConnection>();
+
+//Cors
+var corsPolicyName = "CorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicyName, builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+
+});
+
 
 //Authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
@@ -64,7 +79,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
     });
 
 
+
+
+
 var app = builder.Build();
+
+app.UseCors(corsPolicyName);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -73,10 +93,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
+//app.UseHttpsRedirection();  ---->>>>   bunu neden yorum satýrýna aldýk ??
+
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<ChatHub>("/chathub");
+});
+
 
 app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
 
 app.Run();
