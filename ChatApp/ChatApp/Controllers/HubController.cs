@@ -19,7 +19,7 @@ namespace ChatApp.Controllers
         public async Task<IActionResult> Post([FromBody] string message)
         {
             var connect = _signalRConnection.StartConnection();
-            await connect.InvokeAsync("SendMessageAll", "Admin", message);
+            await connect.InvokeAsync("SendMessageToAll", "Admin", message);
 
             return Ok();
         }

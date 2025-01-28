@@ -8,7 +8,7 @@ namespace ChatApp
         {
             await Clients.Caller.SendAsync("UserConnected", Context.ConnectionId);
         }
-        public async Task SedMessageToAll(string user, string message)
+        public async Task SendMessageToAll(string user, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", user, message);
         }

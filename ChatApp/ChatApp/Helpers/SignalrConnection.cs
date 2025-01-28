@@ -13,7 +13,7 @@ namespace ChatApp.Helpers
 
         public HubConnection StartConnection()
         {
-            var hostInfo = "https=//localhost:7184";
+            var hostInfo = "https://localhost:7184";
             if (_connection != null && _connection.State == HubConnectionState.Connected)
             {
                 return _connection;
