@@ -42,9 +42,15 @@ namespace ChatApp.Services.Services.MessageService
         {
             return await _messageRepository.UpdateAsync(entity);
         }
-        public async Task<List<Message>> GetMessageHistory(MessageHistoryModel messageHistoryModel)
+
+        public async Task<List<Message>> GetPrivateMessageHistory(MessageHistoryModel messageHistoryModel)
         {
-            return await _messageRepository.GetMessageHistory(messageHistoryModel);
+            return await _messageRepository.GetPrivateMessageHistory(messageHistoryModel);
+        }
+
+        public async Task<List<Message>> GetGroupMessageHistory(MessageHistoryModel messageHistoryModel)
+        {
+            return await _messageRepository.GetGroupMessageHistory(messageHistoryModel);
         }
 
     }

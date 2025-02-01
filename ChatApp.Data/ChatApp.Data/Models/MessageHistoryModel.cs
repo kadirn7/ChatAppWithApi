@@ -13,6 +13,6 @@ namespace ChatApp.Data.Models
         public string SenderUsername { get; set; }
         public string? ReceiverUsername { get; set; }
         public string? GroupName { get; set; }
-        public bool MessageForPrivateChat { get; set; }
+      //  public bool? MessageForPrivateChat { get; set; }
     }
 }

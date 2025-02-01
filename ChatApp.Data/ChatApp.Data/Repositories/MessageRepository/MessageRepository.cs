@@ -2,6 +2,7 @@
 using ChatApp.Data.Entities.Db;
 using ChatApp.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ChatApp.Data.Repositories.MessageRepository
 {
@@ -48,7 +49,9 @@ namespace ChatApp.Data.Repositories.MessageRepository
             return await _genericRepository.ListAllAsync(paginationModel);
         }
 
-        public async Task<List<Message>> GetMessageHistory(MessageHistoryModel messageHistoryModel)
+       
+
+        public async Task<List<Message>> GetPrivateMessageHistory(MessageHistoryModel messageHistoryModel)
         {
             var senderUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == messageHistoryModel.SenderUsername);
             var receiverUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == messageHistoryModel.ReceiverUsername);
@@ -58,30 +61,29 @@ namespace ChatApp.Data.Repositories.MessageRepository
                 throw new Exception("Sender or receiver user not found");
             }
 
-            var query = _context.Messages.AsNoTracking();
+            return await _context.Messages
+                .AsNoTracking()
+                .Where(m => (m.UserId == senderUser.Id && m.ReceiverUserId == receiverUser.Id) ||
+                             (m.UserId == receiverUser.Id && m.ReceiverUserId == senderUser.Id))
+                .OrderByDescending(m => m.CreatedAt)
+                .Take(20) // İsteğe bağlı olarak pagination için parametrik hale getirilebilir
+                .ToListAsync();
+        }
 
-            if (messageHistoryModel.MessageForPrivateChat)
+        public async Task<List<Message>> GetGroupMessageHistory(MessageHistoryModel messageHistoryModel)
+        {
+            var group = await _context.Groups.FirstOrDefaultAsync(g => g.Name == messageHistoryModel.GroupName);
+            if (group == null)
             {
-                query = query.Where(m => m.UserId == senderUser.Id && m.ReceiverUserId == receiverUser.Id);
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(messageHistoryModel.GroupName) || messageHistoryModel.GroupName.ToLower() == "null")
-                {
-                    throw new Exception("Group name is required for non-private messages");
-                }
-
-                var receiverGroup = await _context.Groups.FirstOrDefaultAsync(g => g.Name == messageHistoryModel.GroupName);
-                if (receiverGroup == null)
-                {
-                    throw new Exception($"Group '{messageHistoryModel.GroupName}' not found");
-                }
-
-                query = query.Where(m => m.UserId == senderUser.Id && m.GroupId == receiverGroup.Id);
+                throw new Exception($"Group '{messageHistoryModel.GroupName}' not found");
             }
 
-            var queryResult = await query.OrderByDescending(q => q.CreatedAt).Take(20).ToListAsync();
-            return queryResult;
+            return await _context.Messages
+                .AsNoTracking()
+                .Where(m => m.GroupId == group.Id)
+                .OrderByDescending(m => m.CreatedAt)
+                .Take(20) // İsteğe bağlı olarak pagination için parametrik hale getirilebilir
+                .ToListAsync();
         }
     }
 }

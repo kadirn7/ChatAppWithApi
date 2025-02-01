@@ -43,7 +43,10 @@ namespace ChatApp.Services.Services.GroupService
             return await _groupRepository.UpdateAsync(entity);
         }
 
-       
-        
+        public async Task<Group> GetGroupByNameAsync(string name)
+        {
+            return await _groupRepository.GetGroupByNameAsync(name);
+        }
+
     }
 } 

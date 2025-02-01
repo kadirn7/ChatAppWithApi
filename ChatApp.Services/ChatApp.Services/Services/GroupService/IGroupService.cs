@@ -5,6 +5,6 @@ namespace ChatApp.Services.Services.GroupService
 {
     public interface IGroupService : IGenericService<Group>
     {
-        
+        Task<Group> GetGroupByNameAsync(string name);
     }
 } 

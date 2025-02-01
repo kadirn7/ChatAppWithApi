@@ -1,4 +1,5 @@
 using ChatApp.Data.Entities;
+using ChatApp.Services.Services.GroupService;
 using ChatApp.Services.Services.MessageService;
 using ChatApp.Services.Services.UserService;
 using Microsoft.AspNetCore.SignalR;
@@ -10,15 +11,17 @@ namespace ChatApp.Hubs
     private readonly IDictionary<string, string> _connectedUsers;
     private readonly IMessageService _messageService;
     private readonly IUserService _userService;
+        private readonly IGroupService _groupService;
 
-    public ChatHub(IDictionary<string, string> connectedUsers, IMessageService messageService, IUserService userService)
-    {
-        _connectedUsers = connectedUsers;
-        _messageService = messageService;
-        _userService = userService;
-    }
+        public ChatHub(IDictionary<string, string> connectedUsers, IMessageService messageService, IUserService userService, IGroupService groupService)
+        {
+            _connectedUsers = connectedUsers;
+            _messageService = messageService;
+            _userService = userService;
+            _groupService = groupService;
+        }
 
-    public override async Task OnConnectedAsync()
+        public override async Task OnConnectedAsync()
     {
 
 
@@ -66,9 +69,33 @@ namespace ChatApp.Hubs
         await _messageService.AddAsync(newMessage);
 
     }
-    public async Task SendMessageToGroup(string group, string message)
-    {
-        await Clients.Group(group).SendAsync("ReceiveMessageFromGroup", message);
+        public async Task SendMessageToGroup(string group, string message)
+        {
+            var user = Context.User.Identity.Name;
+            var userSender = await _userService.GetUserByUsernameAsync(user);
+            var groupEntity = await _groupService.GetGroupByNameAsync(group);
+
+            if (groupEntity != null)
+            {
+                var newMessage = new Message
+                {
+                    Content = message,
+                    UserId = userSender.Id,
+                    CreatedAt = DateTime.Now,
+                    GroupId = groupEntity.Id,
+                    IsDeleted = false,
+                    UpdatedAt = DateTime.Now,
+                    ReceiverUserId = null,
+                    ReceiverGroupId = groupEntity.Id
+                };
+
+                await _messageService.AddAsync(newMessage);
+                await Clients.Group(group).SendAsync("ReceiveMessageFromGroup", user, message);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("ReceiveMessageFromGroup", "System", "Group not found");
+            }
+        }
     }
-}
 } 

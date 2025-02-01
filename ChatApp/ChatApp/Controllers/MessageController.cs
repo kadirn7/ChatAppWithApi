@@ -20,29 +20,45 @@ namespace ChatApp.Controllers
             _messageService = messageService;
             _mapper = mapper;
         }
-        [HttpGet("GetMessageHistory")]
+
+        [HttpGet("GetMessageHistory")] // Tek action
         public async Task<ReturnModel> GetMessageHistory([FromQuery] MessageHistoryModel messageHistoryModel)
         {
-            var messageHistoriesSents = _mapper.Map<List<MessageModel>>(await _messageService.GetMessageHistory(messageHistoryModel)); //Bunların tipini S olarak işaretle
+            List<Message> messages = null;
+            string messageType = null;
 
-            messageHistoriesSents.ForEach(m => m.Type = "S");
-            var messageHistoriesReceived = _mapper.Map<List<MessageModel>>(await _messageService.GetMessageHistory(new MessageHistoryModel
+            if (!string.IsNullOrEmpty(messageHistoryModel.GroupName))
             {
-                SenderUsername = messageHistoryModel.ReceiverUsername,
-                ReceiverUsername = messageHistoryModel.SenderUsername,
-                MessageForPrivateChat = messageHistoryModel.MessageForPrivateChat,
-                GroupName = messageHistoryModel.GroupName
-            })); //Bunların tipini R olarak işaretle
-            messageHistoriesReceived.ForEach(m => m.Type = "R");
-            var messageHistories = messageHistoriesSents.Concat(messageHistoriesReceived).OrderBy(m => m.CreatedAt).ToList();
+                messages = await _messageService.GetGroupMessageHistory(messageHistoryModel);
+                messageType = "G";
+            }
+            else if (!string.IsNullOrEmpty(messageHistoryModel.SenderUsername) && !string.IsNullOrEmpty(messageHistoryModel.ReceiverUsername))
+            {
+                messages = await _messageService.GetPrivateMessageHistory(messageHistoryModel);
+                messageType = "P"; // Veya "S" ve "R" olarak ayırabilirsiniz
+            }
+            else
+            {
+                return new ReturnModel
+                {
+                    Success = false,
+                    Message = "Either GroupName or both SenderUsername and ReceiverUsername must be provided.",
+                    StatusCode = 400
+                };
+            }
+
+            var messageModels = _mapper.Map<List<MessageModel>>(messages);
+            messageModels.ForEach(m => m.Type = messageType); // Mesaj tipini işaretle
+
             return new ReturnModel
             {
                 Success = true,
                 Message = "Success",
                 StatusCode = 200,
-                Data = messageHistories
+                Data = messageModels
             };
         }
+
         [HttpGet]
         public async Task<ReturnModel> Get([FromQuery] PaginationModel paginationModel)
         {
@@ -71,14 +87,14 @@ namespace ChatApp.Controllers
         [HttpPost]
         public async Task<ReturnModel> Post([FromBody] MessageCreateModel messageModel)
         {
+            
             var message = _mapper.Map<Message>(messageModel);
+
+                // Grup mesajı: alıcı bilgisi grup üzerinden ayarlanır.
+                message.ReceiverGroupId = messageModel.GroupId;
+                
             
-            // Eğer groupId 0 ise null olarak ayarla
-            if (message.GroupId == 0)
-            {
-                message.GroupId = null;
-            }
-            
+
             var messageResult = await _messageService.AddAsync(message);
             return new ReturnModel
             {

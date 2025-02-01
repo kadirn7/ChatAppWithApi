@@ -10,6 +10,10 @@ namespace ChatApp.Data.Repositories.MessageRepository
 {
     public interface IMessageRepository : IGenericRepository<Message>
     {
-        public Task<List<Message>> GetMessageHistory(MessageHistoryModel messageHistoryModel);
+        
+
+        public Task<List<Message>> GetPrivateMessageHistory(MessageHistoryModel messageHistoryModel);
+        public Task<List<Message>> GetGroupMessageHistory(MessageHistoryModel messageHistoryModel);
+
     }
 }

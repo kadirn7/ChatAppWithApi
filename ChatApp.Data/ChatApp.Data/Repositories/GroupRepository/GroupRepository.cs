@@ -4,16 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChatApp.Data.Entities;
+using ChatApp.Data.Entities.Db;
 using ChatApp.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Data.Repositories.GroupRepository
 {
     public class GroupRepository : IGroupRepository
     {
         private readonly IGenericRepository<Group> _genericRepository;
-        public GroupRepository(IGenericRepository<Group> genericRepository)
+        private readonly ChatAppDbContext _context;
+        public GroupRepository(IGenericRepository<Group> genericRepository, ChatAppDbContext context)
         {
             _genericRepository = genericRepository;
+            _context = context;
         }
 
         public async Task<Group> GetByIdAsync(int id)
@@ -44,6 +48,10 @@ namespace ChatApp.Data.Repositories.GroupRepository
         public async Task<int> CountAsync()
         {
             return await  _genericRepository.CountAsync();
+        }
+        public  async  Task<Group> GetGroupByNameAsync(string name)
+        {
+            return await _context.Groups.FirstOrDefaultAsync(u => u.Name == name);
         }
     }
 }

@@ -9,6 +9,6 @@ namespace ChatApp.Data.Repositories.GroupRepository
 {
     public interface IGroupRepository : IGenericRepository<Group>
     {
-
+        public Task<Group> GetGroupByNameAsync(string name);
     }
 }
