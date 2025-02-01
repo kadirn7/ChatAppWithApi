@@ -5,24 +5,24 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace ChatApp.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class HubController : ControllerBase
+   [Route("api/[controller]")]
+[ApiController]
+public class HubController : Controller
+{
+    private readonly ISignalrConnection _signalrConnection;
+
+    public HubController(ISignalrConnection signalrConnection)
     {
-        private readonly ISignalrConnection _signalRConnection;
-
-        public HubController(ISignalrConnection signalRConnection)
-        {
-            _signalRConnection = signalRConnection; 
-        }
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] string message)
-        {
-            var connect = _signalRConnection.StartConnection();
-            await connect.InvokeAsync("SendMessageToAll", "Admin", message);
-
-            return Ok();
-        }
-
+        _signalrConnection = signalrConnection;
     }
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] string message)
+    {
+        var connect = _signalrConnection.StartConnection();
+        await connect.InvokeAsync("SendMessageToAll", "Admin", message);
+        //_signalrConnection.Values.Remove(connect.ConnectionId);
+        //_signalrConnection.Values.Where(x => x.ConnectionId == connect.ConnectionId).FirstOrDefault().Connection.Dispose();
+        return Ok();
+    }
+}
 }

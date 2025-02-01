@@ -56,5 +56,19 @@ public class AuthController : Controller
             StatusCode = 200
         };
     }
-    
+    [HttpPost("register")]
+    public async Task<ReturnModel> Register([FromBody] UserCreateModel userCreateModel)
+    {
+        var newUserr = _mapper.Map<User>(userCreateModel);
+        var newuser = await _userService.AddAsync(newUserr);
+        return new ReturnModel
+        {
+            Success = true,
+            Message = "User registered successfully",
+            Data = newuser,
+            StatusCode = 201
+        };
+
+
+    }
 }

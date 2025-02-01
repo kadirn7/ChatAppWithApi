@@ -43,6 +43,13 @@ namespace ChatApp.Services.Services.UserService
             return await _userRepository.GetByUsernameAndPasswordAsync(username, password);
         }
 
+
+
+        public async Task<List<User>> GetUsersByNameAsync(string name)
+        {
+            return await _userRepository.GetUsersByNameAsync(name);
+        }
+
         public async Task<IReadOnlyList<User>> ListAllAsync(PaginationModel paginationModel)
         {
             return await _userRepository.ListAllAsync(paginationModel);
@@ -51,6 +58,10 @@ namespace ChatApp.Services.Services.UserService
         public async Task<User> UpdateAsync(User entity)
         {
             return await _userRepository.UpdateAsync(entity);
+        }
+        public async Task<User> GetUserByUsernameAsync(string username)
+        {
+            return await _userRepository.GetUserByUsernameAsync(username);
         }
     }
 }

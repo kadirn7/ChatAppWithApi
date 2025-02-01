@@ -15,14 +15,36 @@ namespace ChatApp.Controllers
     {
         private readonly IMessageService _messageService;
         private readonly IMapper _mapper;
-
         public MessageController(IMessageService messageService, IMapper mapper)
         {
             _messageService = messageService;
             _mapper = mapper;
         }
+        [HttpGet("GetMessageHistory")]
+        public async Task<ReturnModel> GetMessageHistory([FromQuery] MessageHistoryModel messageHistoryModel)
+        {
+            var messageHistoriesSents = _mapper.Map<List<MessageModel>>(await _messageService.GetMessageHistory(messageHistoryModel)); //Bunların tipini S olarak işaretle
+
+            messageHistoriesSents.ForEach(m => m.Type = "S");
+            var messageHistoriesReceived = _mapper.Map<List<MessageModel>>(await _messageService.GetMessageHistory(new MessageHistoryModel
+            {
+                SenderUsername = messageHistoryModel.ReceiverUsername,
+                ReceiverUsername = messageHistoryModel.SenderUsername,
+                MessageForPrivateChat = messageHistoryModel.MessageForPrivateChat,
+                GroupName = messageHistoryModel.GroupName
+            })); //Bunların tipini R olarak işaretle
+            messageHistoriesReceived.ForEach(m => m.Type = "R");
+            var messageHistories = messageHistoriesSents.Concat(messageHistoriesReceived).OrderBy(m => m.CreatedAt).ToList();
+            return new ReturnModel
+            {
+                Success = true,
+                Message = "Success",
+                StatusCode = 200,
+                Data = messageHistories
+            };
+        }
         [HttpGet]
-        public async Task<ReturnModel> GetMessages([FromQuery] PaginationModel paginationModel)
+        public async Task<ReturnModel> Get([FromQuery] PaginationModel paginationModel)
         {
             var messages = await _messageService.ListAllAsync(paginationModel);
             return new ReturnModel
@@ -35,72 +57,62 @@ namespace ChatApp.Controllers
             };
         }
         [HttpGet("{id}")]
-        public async Task<ReturnModel> GetMessage(int id)
+        public async Task<ReturnModel> Get(int id)
         {
             var message = await _messageService.GetByIdAsync(id);
-            if (message == null)
-            {
-                return new ReturnModel
-                {
-                    Success = false,
-                    Message = "Message not found",
-                    StatusCode = 404
-                };
-            }
             return new ReturnModel
             {
                 Success = true,
-                Message = "Message fetched successfully",
-                Data = message,
+                Message = "Success",
+                Data = _mapper.Map<MessageModel>(message),
                 StatusCode = 200
             };
         }
         [HttpPost]
-        public async Task<ReturnModel> CreateMessage([FromBody] MessageCreateModel messageCreateModel)
+        public async Task<ReturnModel> Post([FromBody] MessageCreateModel messageModel)
         {
-            var message = _mapper.Map<Message>(messageCreateModel);
+            var message = _mapper.Map<Message>(messageModel);
+            
+            // Eğer groupId 0 ise null olarak ayarla
+            if (message.GroupId == 0)
+            {
+                message.GroupId = null;
+            }
+            
             var messageResult = await _messageService.AddAsync(message);
             return new ReturnModel
             {
                 Success = true,
-                Message = "Message created successfully",
-                Data = messageResult,
-                StatusCode = 201
+                Message = "Success",
+                Data = _mapper.Map<MessageModel>(messageResult),
+                StatusCode = 200
             };
         }
         [HttpPut]
-        public async Task<ReturnModel> UpdateMessage([FromBody] MessageUpdateModel messageUpdateModel)
+        public async Task<ReturnModel> Put([FromBody] MessageUpdateModel messageModel)
         {
-            var message = _mapper.Map<Message>(messageUpdateModel);
+            var message = _mapper.Map<Message>(messageModel);
             var messageResult = await _messageService.UpdateAsync(message);
             return new ReturnModel
             {
                 Success = true,
-                Message = "Message updated successfully",
-                Data = messageResult,
+                Message = "Success",
+                Data = _mapper.Map<MessageModel>(messageResult),
                 StatusCode = 200
             };
         }
         [HttpDelete("{id}")]
-        public async Task<ReturnModel> DeleteMessage(int id)
+        public async Task<ReturnModel> Delete(int id)
         {
             var message = await _messageService.GetByIdAsync(id);
-            if (message == null)
-            {
-                return new ReturnModel
-                {
-                    Success = false,
-                    Message = "Message not found",
-                    StatusCode = 404
-                };
-            }
             await _messageService.DeleteAsync(message);
             return new ReturnModel
             {
                 Success = true,
-                Message = "Message deleted successfully",
+                Message = "Success",
                 StatusCode = 200
             };
         }
+
     }
 }

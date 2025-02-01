@@ -34,5 +34,6 @@ namespace ChatApp.Services.Helpers
             return token;
         }
 
+
     }
 }

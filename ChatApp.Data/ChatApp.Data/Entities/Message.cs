@@ -14,6 +14,7 @@ namespace ChatApp.Data.Entities
         public int? GroupId { get; set; }
         public Group Group { get; set; }
 
-
+        public int? ReceiverUserId { get; set; }
+        public int? ReceiverGroupId { get; set; }
     }
 }
